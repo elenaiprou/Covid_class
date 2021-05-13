@@ -1,3 +1,6 @@
 venv/
 .env
 **/__ pycache__/
+__pycache__/run.cpython-39.pyc
+covid/__pycache__/__init__.cpython-39.pyc
+covid/__pycache__/views.cpython-39.pyc
