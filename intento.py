@@ -1,8 +1,61 @@
+@app.route("/casos/<int:year>/<int:mes>/<int:dia>")
+def casos(year, mes, dia):
+    fichero = open("data/casos_diagnostico_provincia.csv", "r", encoding="utf8")
+    dictreader = csv.DictReader(fichero)
+    
+    sumNumCasos = 0
+    for registro in dictreader:
+            while registro['fecha'] == str(year)+'-'+ str(mes)+'-'+str(dia):
+                d = registro['num_casos']
+                sumNumCasos += int(d)
+                fichero.close()
+            return str(sumNumCasos)
+    
+    fichero.close()
+
+
+@app.route("/casos/<int:year>/<int:mes>/<int:dia>")
+def casos(year, mes, dia):
+    fichero = open("data/casos_diagnostico_provincia.csv", "r", encoding="utf8")
+    dictreader = csv.DictReader(fichero)
+
+    lista = []
+    for registro in dictreader:
+            while registro['fecha'] == year and mes and dia: #str(year)+'-'+ str(mes)+'-'+str(dia):
+                d = (registro['provincia_iso'])
+                lista.append(d)
+            
+            fichero.close()
+            print(lista)
+            return json.dumps(lista)
+    
+    fichero.close()
+    return "No lo sabes leer bien!!!"
+
+    @app.route("/casos/<year>/<mes>/<dia>")
+def casos(year, mes, dia):
+    fichero = open("data/casos_diagnostico_provincia.csv", "r", encoding="utf8")
+    dictreader = csv.DictReader(fichero)
+    
+    sumNumCasos = 0
+    for registro in dictreader:
+
+        # print(registro['fecha'])
+        # print( str(year)+'-'+ str(mes)+'-'+str(dia))
+
+        if registro['fecha'] == str(year)+'-'+ str(mes)+'-'+str(dia):
+            #print(sumNumCasos)  
+            d = registro['num_casos']
+            sumNumCasos += int(d)
+    fichero.close()
+    return str(sumNumCasos)
+
+#aqui me funcionaba--------------------------------------:
+
 #vam estar todas las rutas que tengan que ver con la app (en este caso app covid)
 from covid import app
 import csv
 import json
-
 
 @app.route("/provincias")
 def provincias():
@@ -32,10 +85,8 @@ def laprovincia(codigoProvincia):
     fichero.close()
     return "El valor no existe. Largo de aquí!!!"
 
-#@app.route("/casos/<int:year>/<int:mes>/<int:dia>") #ponemos "int" para restringir la entrada de datos, y obligar q sean numericos enteros.
-#def casos(year, mes, dia):
-    fecha = "{:04d}-{:02d}-{:02d}".format(year,mes,dia) #02d pone dos dijitos minimo de la entrada obligando a poner un 0 delante. Convirtiendo fehca en string
-
+@app.route("/casos/<year>/<mes>/<dia>")
+def casos(year, mes, dia):
     fichero = open("data/casos_diagnostico_provincia.csv", "r", encoding="utf8")
     dictreader = csv.DictReader(fichero)
     
@@ -49,9 +100,7 @@ def laprovincia(codigoProvincia):
     for registro in dictreader:
         #if (year and mes) and (year and dia) and (mes and dia) in registro['fecha']: no funciona porque estoy comparando valores numericos 
         # con la fecha que es un string.
-        
-        if fecha == registro['fecha']:
-        #if registro['fecha'] == str(year)+'-'+ str(mes)+'-'+str(dia):
+        if registro['fecha'] == str(year)+'-'+ str(mes)+'-'+str(dia):
             i = registro['num_casos']
             sumNumCasos += int(i)
         #if registro['fecha'] == str(year)+'-'+ str(mes)+'-'+str(dia): 
@@ -85,40 +134,3 @@ def laprovincia(codigoProvincia):
     lista.append(d)
     fichero.close()
     return json.dumps(lista)
-
-
-@app.route("/casos/<int:year>", defaults={"mes": None, "dia":None})
-@app.route("/casos/<int:year>/<int:mes>", defaults={"dia":None})
-@app.route("/casos/<int:year>/<int:mes>/<int:dia>") #ponemos "int" para restringir la entrada de datos, y obligar q sean numericos enteros.
-def casos(year, mes, dia):
-    #validar fecha. Es importante orden del if, primero el mes, y despues el dia.
-    if not mes:
-        fecha = "{:04d}".format(year)
-    elif not dia:
-        fecha = "{:04d}-{:02d}".format(year,mes)
-    else:
-        fecha = "{:04d}-{:02d}-{:02d}".format(year,mes,dia) #02d pone dos dijitos minimo de la entrada obligando a poner un 0 delante. Convirtiendo fehca en string
-
-    #fecha = "{:04d}-{:02d}-{:02d}".format(year,mes,dia) #02d pone dos dijitos minimo de la entrada obligando a poner un 0 delante. Convirtiendo fehca en string
-    fichero = open("data/casos_diagnostico_provincia.csv", "r", encoding="utf8")
-    dictreader = csv.DictReader(fichero)
-    
-    res ={
-        'num_casos' : 0,
-        'num_casos_prueba_pcr': 0, 
-        'num_casos_prueba_test_ac': 0,
-        'num_casos_prueba_ag': 0, 
-        'num_casos_prueba_elisa': 0,
-        'num_casos_prueba_desconocida': 0
-    }
-    
-    for registro in dictreader:
-        if fecha in registro['fecha']:
-            for clave in res:
-                res[clave]+= int(registro[clave])
-        
-        elif registro['fecha'] > fecha:
-            break
-
-    fichero.close
-    return json.dumps(res) #te garantiza que salga de tal manera que json lo pueda leer en el servidor.
