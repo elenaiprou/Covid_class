@@ -32,7 +32,7 @@ def casos(year, mes, dia):
     fichero.close()
     return "No lo sabes leer bien!!!"
 
-    @app.route("/casos/<year>/<mes>/<dia>")
+@app.route("/casos/<year>/<mes>/<dia>")
 def casos(year, mes, dia):
     fichero = open("data/casos_diagnostico_provincia.csv", "r", encoding="utf8")
     dictreader = csv.DictReader(fichero)

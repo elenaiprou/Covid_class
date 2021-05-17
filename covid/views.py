@@ -1,4 +1,5 @@
 #vam estar todas las rutas que tengan que ver con la app (en este caso app covid)
+from flask import render_template
 from covid import app
 import csv
 import json
@@ -122,3 +123,8 @@ def casos(year, mes, dia):
 
     fichero.close
     return json.dumps(res) #te garantiza que salga de tal manera que json lo pueda leer en el servidor.
+
+
+@app.route("/incidenciasdiarias", methods = {'GET', 'POST'})
+def incidencia():
+    return render_template("alta.html")
