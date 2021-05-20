@@ -1,8 +1,10 @@
 #vam estar todas las rutas que tengan que ver con la app (en este caso app covid)
-from flask import render_template
+
+from flask import render_template, request
 from covid import app
 import csv
 import json
+from datetime import date
 
 
 @app.route("/provincias")
@@ -125,6 +127,43 @@ def casos(year, mes, dia):
     return json.dumps(res) #te garantiza que salga de tal manera que json lo pueda leer en el servidor.
 
 
-@app.route("/incidenciasdiarias", methods = {'GET', 'POST'})
+@app.route("/incidenciasdiarias", methods = ['GET', 'POST'])
 def incidencia():
-    return render_template("alta.html")
+    formulario = {
+        'provincia': '',
+        'fecha': str(date.today()),
+        'num_casos_prueba_pcr': 0,
+        'num_casos_prueba_test_ac': 0, 
+        'num_casos_prueba_ag': 0,
+        'num_casos_prueba_elisa': 0,
+        'num_casos_prueba_desconocida': 0
+    }
+
+    fichero = open("data/provincias.csv", "r", encoding="utf8")
+    csvreader = csv.reader(fichero, delimiter=",")
+    next(csvreader) #--> nos salta la primera linia de la lectura del fichero (donde pone el texto "codigo y provincias")
+
+    lista = []
+    for registro in csvreader:
+        d= {'codigo': registro[0], 'descripcion': registro[1]}
+        lista.append(d)
+
+    #ponemos las provincias como un desplegable de selección. Ademas nosotros vemos el nombre entero, pero el servidor solo recibe 
+    #el codigo de la provincia, puesto que hacemos una lista de diccionarios.
+    fichero.close()
+
+
+    if request.method == 'GET':
+        return render_template("alta.html", datos = formulario, provincias = lista)
+    
+    #Validaciones
+    #vamos a utilizar request.form
+    num_pcr = request.form['num_casos_prueba_pcr']
+    try:
+        num_pcr = int(num_pcr)
+        if num_pcr < 0:
+            raise ValueError('Debe ser no negativo')
+    except ValueError:
+        return render_template("alta.html", datos=formulario, provincias = lista, error = "PCR no puede ser negativa")
+    
+    return 'Ha hecho un post'
